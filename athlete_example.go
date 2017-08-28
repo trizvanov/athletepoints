@@ -13,20 +13,26 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"net/http"
 
 	"github.com/strava/go.strava"
+	"goji.io"
+	"goji.io/pat"
 )
 
 func main() {
-	var athleteId int64
-	var accessToken string
 
-	// Provide an access token, with write permissions.
-	// You'll need to complete the oauth flow to get one.
-	flag.Int64Var(&athleteId, "id", 0, "Athlete Id")
-	flag.StringVar(&accessToken, "token", "", "Access Token")
+    mux := goji.NewMux()
 
-	flag.Parse()
+    mux.HandleFunc(pat.Get("/get/friends/:token"), listFriends)
+
+    http.ListenAndServe("localhost:8000", mux)
+
+}
+
+func listFriends(w http.ResponseWriter, r *http.Request) {
+
+	accessToken := pat.Param(r, "token")
 
 	if accessToken == "" {
 		fmt.Println("\nPlease provide an access_token, one can be found at https://www.strava.com/settings/api")
